@@ -84,6 +84,15 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: python -m pip install feedparser
+
+      - name: Find release notes
+        run: ./find_release_notes.py $VERSION > body.html
+
       - name: Download Files
         uses: actions/download-artifact@v3
 
@@ -91,7 +100,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           name: Chromium ${{ github.ref_name }}
-          body: ''
-          draft: true
+          bodyFile: body.html
           artifacts: artifact/*.tar.xz
           artifactErrorsFailBuild: true

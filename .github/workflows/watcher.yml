@@ -1,0 +1,30 @@
+name: watcher
+
+on:
+  schedule:
+    - cron: '0 18 * * *'
+
+jobs:
+  watcher:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CHROMIUM_SOURCE_TARBALL_PUSH_TOKEN }}
+
+      - name: Install dependencies
+        run: python -m pip install feedparser
+
+      - name: Tag new Chrome releases
+        run: |
+          tags=$(./find_latest_releases.py)
+          git pull --tags
+          set +e  # ignore git tag errors
+          for tag in $tags; do
+            printf "Tagging $tag\n"
+            git tag $tag
+          done
+          set -e  # report errors
+          git push --tags
