@@ -26,7 +26,7 @@ jobs:
 
       - name: Create source tarball
         run: |
-          ./export_tarball.py chromium-$VERSION-${{ matrix.targetOs }} --version $VERSION --src-dir src --progress
+          ./export_tarball.py chromium-$VERSION-${{ matrix.targetOs }} --progress
           ls -lh *.tar.xz
 
       - name: Upload Binary Files

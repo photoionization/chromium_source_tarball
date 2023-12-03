@@ -170,25 +170,18 @@ class MyTarFile(tarfile.TarFile):
 
 def main(argv):
   parser = optparse.OptionParser()
-  parser.add_option("--basename")
-  parser.add_option("--remove-nonessential-files",
-                    dest="remove_nonessential_files",
-                    action="store_true", default=True)
-  parser.add_option("--test-data", action="store_true", default=False)
-  parser.add_option("--verbose", action="store_true", default=False)
-  parser.add_option("--progress", action="store_true", default=True)
-  parser.add_option("--src-dir")
-  parser.add_option("--version")
+  parser.add_option('--basename')
+  parser.add_option('--nonessential-files', action='store_true', default=False)
+  parser.add_option('--test-data', action='store_true', default=False)
+  parser.add_option('--verbose', action='store_true', default=False)
+  parser.add_option('--progress', action='store_true', default=True)
+  parser.add_option('--src-dir', default='src')
 
   options, args = parser.parse_args(argv)
 
   if len(args) != 1:
     print('You must provide only one argument: output file name')
     print('(without .tar.xz extension).')
-    return 1
-
-  if not options.version:
-    print('A version number must be provided via the --version option.')
     return 1
 
   if not os.path.exists(options.src_dir):
@@ -200,7 +193,7 @@ def main(argv):
 
   archive = MyTarFile.open(output_fullname, 'w:xz',
                            preset=(9 | lzma.PRESET_EXTREME))
-  archive.set_remove_nonessential_files(options.remove_nonessential_files)
+  archive.set_remove_nonessential_files(not options.nonessential_files)
   archive.set_verbose(options.verbose)
   archive.set_progress(options.progress)
   archive.set_src_dir(options.src_dir)
@@ -223,5 +216,5 @@ def main(argv):
   return 0
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))

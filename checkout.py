@@ -31,6 +31,10 @@ def main():
                       help='The revision to checkout')
   args = parser.parse_args()
 
+  if os.path.exists('src'):
+    print('The src dir already exists.')
+    return 1
+
   # The source tarball is usually built on Linux machines.
   target_os = [ args.target_os ]
   if args.target_os == 'win':
