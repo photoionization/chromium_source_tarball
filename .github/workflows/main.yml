@@ -1,11 +1,19 @@
 name: tarball
 
-on: push
+on: [push, pull_request]
+
+env:
+  VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '121.0.6147.0' }}
 
 jobs:
   build:
     runs-on: ubuntu-22.04
     continue-on-error: false
+
+    strategy:
+      fail-fast: false
+      matrix:
+        targetOs: [linux, mac, win]
 
     steps:
       - name: Checkout
@@ -14,9 +22,31 @@ jobs:
           submodules: recursive
 
       - name: Checkout Chromium
-        run: ./checkout.py --revision 121.0.6147.0
+        run: ./checkout.py --target-os ${{ matrix.targetOs }} --revision $VERSION
 
       - name: Create source tarball
-        run: |
-          ./export_tarball.py test --version 121.0.6147.0 --src-dir src --progress
-          ls -l test.tar.gz
+        run: ./export_tarball.py chromium-$VERSION-${{ matrix.targetOs }} --version $VERSION --src-dir src --progress
+
+      - name: Upload Binary Files
+        uses: actions/upload-artifact@v3
+        with:
+          path: chromium-$VERSION-${{ matrix.targetOs }}.tar.xz
+          retention-days: 1
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download Files
+        uses: actions/download-artifact@v3
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          name: Chromium ${{ github.ref_name }}
+          body: ''
+          draft: true
+          artifacts: artifact/*.tar.xz
+          artifactErrorsFailBuild: true
