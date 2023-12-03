@@ -40,11 +40,12 @@ NONESSENTIAL_DIRS = {
     'third_party/apache-mac',
     'third_party/apache-mac-arm64',
     'third_party/apache-windows-arm64',
-    'third_party/angle/third_party/VK-GL-CTS/src/android'
+    'third_party/angle/third_party/VK-GL-CTS/src/android',
+    'third_party/angle/third_party/VK-GL-CTS/src/external',
     'third_party/catapult/third_party/vinn/third_party',
     'third_party/closure_compiler',
     'third_party/blink/manual_tests',
-    'third_party/blink/perf_tests'
+    'third_party/blink/perf_tests',
     'third_party/blink/tools',
     'third_party/blink/web_tests',
     'third_party/dawn/third_party/khronos/OpenGL-Registry/specs',

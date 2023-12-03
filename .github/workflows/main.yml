@@ -10,11 +10,6 @@ jobs:
     runs-on: ubuntu-22.04
     continue-on-error: false
 
-    strategy:
-      fail-fast: false
-      matrix:
-        targetOs: [linux, mac, win]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -22,11 +17,11 @@ jobs:
           submodules: recursive
 
       - name: Checkout Chromium
-        run: ./checkout.py --target-os ${{ matrix.targetOs }} --revision $VERSION
+        run: ./checkout.py --revision $VERSION
 
       - name: Create source tarball
         run: |
-          ./export_tarball.py chromium-$VERSION-${{ matrix.targetOs }} --progress
+          ./export_tarball.py chromium-$VERSION --progress
           ls -lh *.tar.xz
 
       - name: Upload Binary Files
