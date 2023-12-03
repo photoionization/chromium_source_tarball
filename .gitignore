@@ -1,0 +1,10 @@
+/__pycache__
+/.gclient
+/.gclient_entries
+/.gclient_previous_sync_commits
+/.cipd/
+/src/
+
+*.swp
+*.tar
+*.tar.xz
