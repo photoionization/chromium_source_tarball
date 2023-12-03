@@ -30,9 +30,55 @@ jobs:
           path: '*.tar.xz'
           retention-days: 1
 
+  test:
+    needs: [build]
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-13]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          repository: photoionization/build_chromium
+          submodules: recursive
+
+      - name: Download Files
+        uses: actions/download-artifact@v3
+
+      - name: Use XCode 15
+        if: runner.os == 'macOS'
+        run: |
+          XCODE_APP=$(find /Applications -maxdepth 1 -type d -name "Xcode_15.*" -print -quit)
+          echo 'Using' $XCODE_APP
+          sudo xcode-select --switch $XCODE_APP
+
+      - name: Install Linux Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install gperf
+          /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+
+      - name: Setup GOMA
+        env:
+          SECRET_FILE_CONTENT: ${{ secrets.GOMA_OAUTH2_CONFIG }}
+        run: |
+          printf "$SECRET_FILE_CONTENT" > ~/.goma_oauth2_config
+          ./goma.js
+
+      - name: Checkout Chromium
+        run: ./bootstrap.py --tarball-url file://`pwd`/artifact/chromium-$VERSION.tar.xz
+
+      - name: Build Chromium
+        run: ./gn_gen.py --goma && ./build.py
+
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [build]
+    needs: [test]
     runs-on: ubuntu-latest
     permissions:
       contents: write
