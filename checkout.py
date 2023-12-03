@@ -49,9 +49,7 @@ def main():
     f.write(f'target_os = [ "{joined}" ]\n')
 
   # Checkout code.
-  subprocess.check_call([ 'gclient', 'sync',
-                          '--nohooks', '--no-history',
-                          '--deps', ','.join(target_os) ])
+  subprocess.check_call([ 'gclient', 'sync', '--nohooks', '--no-history' ])
 
   # Execute some necessary hook steps.
   subprocess.check_call([ sys.executable,
