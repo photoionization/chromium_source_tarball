@@ -23,27 +23,6 @@ def download_from_google_storage(
     args += [ '-o', output ]
   subprocess.check_call(args)
 
-def cipd(root, ensure):
-  args = [ 'cipd', 'ensure', '-root', root, '-ensure-file', '-' ]
-  process = subprocess.Popen(args,
-                             text=True,
-                             stdin=subprocess.PIPE,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
-  stdout, stderr = process.communicate(input=ensure)
-  if process.returncode != 0:
-    print(stdout)
-    print(stderr)
-    raise ValueError('cipd failed.')
-
-def read_var_from_deps(var):
-  with open('src/DEPS', 'r') as file:
-    content = file.read()
-    prefix = f"'{var}': '"
-    start = content.find(prefix) + len(prefix)
-    end = content.find("'", start)
-    return content[start:end]
-
 def main():
   add_depot_tools_to_path()
 
@@ -65,39 +44,12 @@ def main():
                           'src/build/util/lastchange.py',
                           '-s', 'src/third_party/dawn',
                           '--revision', 'src/gpu/webgpu/DAWN_VERSION' ])
-
-  gn_version = read_var_from_deps('gn_version')
-  cipd('src/buildtools/mac', 'gn/gn/mac-amd64 ' + gn_version)
-  cipd('src/buildtools/win', 'gn/gn/windows-amd64 ' + gn_version)
-  cipd('src/buildtools/linux64', 'gn/gn/linux-amd64 ' + gn_version)
-
   download_from_google_storage(
       'chromium-nodejs',
       sha_file='src/third_party/node/node_modules.tar.gz.sha1')
-
-  download_from_google_storage(
-      'chromium-nodejs/16.13.0',
-      sha_file='src/third_party/node/mac/node-darwin-x64.tar.gz.sha1')
-  download_from_google_storage(
-      'chromium-nodejs/16.13.0',
-      sha_file='src/third_party/node/mac/node-darwin-arm64.tar.gz.sha1')
-  download_from_google_storage(
-      'chromium-nodejs/16.13.0',
-      sha_file='src/third_party/node/linux/node-linux-x64.tar.gz.sha1')
-  download_from_google_storage(
-      'chromium-nodejs/16.13.0',
-      extract=False,
-      sha_file='src/third_party/node/win/node.exe.sha1')
-
   download_from_google_storage(
       'chromium-fonts',
       sha_file='src/third_party/test_fonts/test_fonts.tar.gz.sha1')
-
-  download_from_google_storage(
-      'chromium-browser-clang',
-      sha_file='src/tools/clang/dsymutil/bin/dsymutil.x64.sha1',
-      extract=False,
-      output='src/tools/clang/dsymutil/bin/dsymutil')
 
 if __name__ == '__main__':
   main()

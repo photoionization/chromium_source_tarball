@@ -28,7 +28,6 @@ NONESSENTIAL_DIRS = {
     'android_webview',
     'buildtools/reclient',
     'chrome/android',
-    'chrome/browser/ui/android',
     'chromecast',
     'infra',
     'ios',
