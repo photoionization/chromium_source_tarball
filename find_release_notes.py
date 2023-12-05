@@ -13,7 +13,7 @@ def main():
   feed = feedparser.parse(rss_url)
 
   matching_article = None
-  for entry in reversed(feed.entries):
+  for entry in feed.entries:
     if args.search_string in entry.title or \
        args.search_string in entry.summary:
       matching_article = entry
