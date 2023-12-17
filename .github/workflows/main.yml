@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-13]
+        os: [ubuntu-22.04, macos-13, windows-2022]
 
     steps:
       - name: Checkout
@@ -46,8 +46,12 @@ jobs:
           repository: photoionization/build_chromium
           submodules: recursive
 
-      - name: Download Files
-        uses: actions/download-artifact@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.11'
+
+      - name: Install python dependencies
+        run: python -m pip install pyyaml httplib2
 
       - name: Use XCode 15
         if: runner.os == 'macOS'
@@ -63,18 +67,25 @@ jobs:
           sudo apt install gperf
           /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 
+      - name: Download Files
+        uses: actions/download-artifact@v3
+
+      - name: Checkout Chromium
+        shell: bash
+        run: python3 bootstrap.py --tarball-url 'file:///${{ github.workspace }}'"/artifact/chromium-$VERSION.tar.xz"
+
       - name: Setup GOMA
+        shell: bash
         env:
           SECRET_FILE_CONTENT: ${{ secrets.GOMA_OAUTH2_CONFIG }}
         run: |
           printf "$SECRET_FILE_CONTENT" > ~/.goma_oauth2_config
-          ./goma.js
-
-      - name: Checkout Chromium
-        run: ./bootstrap.py --tarball-url file://`pwd`/artifact/chromium-$VERSION.tar.xz
+          node goma.js
 
       - name: Build Chromium
-        run: ./gn_gen.py --goma && ./build.py
+        run: |
+          python3 gn_gen.py --goma
+          python3 build.py
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
