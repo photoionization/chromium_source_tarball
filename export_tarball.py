@@ -56,7 +56,6 @@ NONESSENTIAL_DIRS = {
     'third_party/jdk/extras',
     'third_party/liblouis/src/tests/braille-specs',
     'third_party/swift-toolchain/',
-    'third_party/swiftshader/third_party/llvm-10.0',
     'third_party/swiftshader/third_party/llvm-16.0',
     'third_party/xdg-utils/tests',
     'v8/test',
