@@ -3,7 +3,7 @@ name: tarball
 on: [push, pull_request]
 
 env:
-  VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '121.0.6147.0' }}
+  VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '122.0.6182.0' }}
 
 jobs:
   build:
@@ -32,12 +32,13 @@ jobs:
 
   test:
     needs: [build]
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ fromJson('{"linux":"ubuntu-22.04","mac":"macos-13","win":"windows-2022"}')[matrix.targetOs] }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-13, windows-2022]
+        targetOs: [linux, mac, win]
+        targetCpu: [x64, arm64]
 
     steps:
       - name: Checkout
@@ -72,7 +73,7 @@ jobs:
 
       - name: Checkout Chromium
         shell: bash
-        run: python3 bootstrap.py --tarball-url 'file:///${{ github.workspace }}'"/artifact/chromium-$VERSION.tar.xz"
+        run: python3 bootstrap.py --tarball-url 'file:///${{ github.workspace }}'"/artifact/chromium-$VERSION.tar.xz" --target-cpu ${{ matrix.targetCpu }}
 
       - name: Setup GOMA
         shell: bash
@@ -84,7 +85,7 @@ jobs:
 
       - name: Build Chromium
         run: |
-          python3 gn_gen.py --goma
+          python3 gn_gen.py --goma --target-cpu ${{ matrix.targetCpu }}
           python3 build.py
 
   release:
