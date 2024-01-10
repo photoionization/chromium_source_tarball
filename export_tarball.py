@@ -26,7 +26,7 @@ import tarfile
 
 NONESSENTIAL_DIRS = {
     'android_webview',
-    'buildtools/reclient',
+    'buildtools/reclient/',
     'chrome/android',
     'chromecast',
     'infra',
