@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 env:
   VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '122.0.6226.2' }}
+  REMOTE: ${{ (startsWith(github.ref, 'refs/tags/121') || startsWith(github.ref, 'refs/tags/120')) && 'goma' || 'reclient' }}
 
 jobs:
   build:
@@ -76,14 +77,23 @@ jobs:
         run: python3 bootstrap.py --tarball-url 'file:///${{ github.workspace }}'"/artifact/chromium-$VERSION.tar.xz" --target-cpu ${{ matrix.targetCpu }}
 
       - name: Setup Reclient
+        if: env.REMOTE == 'reclient'
         env:
           ELECTRON_RBE_JWT: ${{ secrets.RBE_SECRET }}
+        run: node reclient.js login
+
+      - name: Setup GOMA
+        if: env.REMOTE == 'goma'
+        shell: bash
+        env:
+          SECRET_FILE_CONTENT: ${{ secrets.GOMA_OAUTH2_CONFIG }}
         run: |
-          node reclient.js login
+          printf "$SECRET_FILE_CONTENT" > ~/.goma_oauth2_config
+          node goma.js
 
       - name: Build Chromium
         run: |
-          python3 gn_gen.py --reclient --target-cpu ${{ matrix.targetCpu }}
+          python3 gn_gen.py --${{ env.REMOTE }} --target-cpu ${{ matrix.targetCpu }}
           python3 build.py
 
   release:
