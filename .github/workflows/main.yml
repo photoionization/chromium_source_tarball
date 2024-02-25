@@ -1,9 +1,17 @@
 name: tarball
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Which Chromium version to build
+        required: true
+        type: string
 
 env:
-  VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '122.0.6226.2' }}
+  VERSION: ${{ inputs.version && inputs.version || (startsWith(github.ref, 'refs/tags/') && github.ref_name || '122.0.6226.2') }}
   REMOTE: ${{ (startsWith(github.ref, 'refs/tags/121') || startsWith(github.ref, 'refs/tags/120')) && 'goma' || 'reclient' }}
 
 jobs:
@@ -35,8 +43,8 @@ jobs:
           retention-days: 1
 
   test:
-    if: false
-    # needs: [build]
+    if: inputs.version
+    needs: [build]
     runs-on: ${{ fromJson('{"linux":"ubuntu-22.04","mac":"macos-13","win":"windows-2022"}')[matrix.targetOs] }}
 
     strategy:
@@ -102,7 +110,6 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    # needs: [test]
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
