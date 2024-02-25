@@ -11,7 +11,7 @@ on:
         type: string
 
 env:
-  VERSION: ${{ inputs.version && inputs.version || (startsWith(github.ref, 'refs/tags/') && github.ref_name || '122.0.6226.2') }}
+  VERSION: ${{ inputs.version && inputs.version || (startsWith(github.ref, 'refs/tags/') && github.ref_name || '124.0.6315.2') }}
   REMOTE: ${{ (startsWith(github.ref, 'refs/tags/121') || startsWith(github.ref, 'refs/tags/120')) && 'goma' || 'reclient' }}
 
 jobs:
@@ -20,8 +20,12 @@ jobs:
     continue-on-error: false
 
     steps:
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
+      - name: Mount workspace to /mnt
+        if: runner.os == 'Linux'
+        run: |
+          sudo mkdir /mnt/work
+          sudo mount --bind /mnt/work ${{ github.workspace }}
+          sudo chown runner:runner ${{ github.workspace }}
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -54,6 +58,13 @@ jobs:
         targetCpu: [x64, arm64]
 
     steps:
+      - name: Mount workspace to /mnt
+        if: runner.os == 'Linux'
+        run: |
+          sudo mkdir /mnt/work
+          sudo mount --bind /mnt/work ${{ github.workspace }}
+          sudo chown runner:runner ${{ github.workspace }}
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
