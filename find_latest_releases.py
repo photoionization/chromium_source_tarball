@@ -13,9 +13,9 @@ def find_version(content):
   else:
     return None
 
-def get_versions_in_last_25_hours(feed_url):
+def get_versions_in_last_48_hours(feed_url):
   feed = feedparser.parse(feed_url)
-  one_day_ago = datetime.now() - timedelta(hours=25)
+  one_day_ago = datetime.now() - timedelta(hours=48)
 
   version_numbers = []
   for entry in feed.entries:
@@ -32,7 +32,7 @@ def get_versions_in_last_25_hours(feed_url):
 
 def main():
   feed_url = 'http://googlechromereleases.blogspot.com/atom.xml'
-  versions = get_versions_in_last_25_hours(feed_url)
+  versions = get_versions_in_last_48_hours(feed_url)
   print(' '.join(versions[:3]))
 
 if __name__ == "__main__":
