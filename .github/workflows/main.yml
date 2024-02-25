@@ -12,6 +12,9 @@ jobs:
     continue-on-error: false
 
     steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
